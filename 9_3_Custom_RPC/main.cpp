@@ -11,6 +11,8 @@ RpcDigitalOut myled3(LED3,"myled3");
 BufferedSerial pc(USBTX, USBRX);
 void LEDControl(Arguments *in, Reply *out);
 RPCFunction rpcLED(&LEDControl, "LEDControl");
+void LEDControl1(Arguments *in, Reply *out);
+RPCFunction rpcBlink(&LEDControl1, "Blink");
 double x, y;
 
 int main() {
@@ -39,6 +41,56 @@ int main() {
 }
 
 // Make sure the method takes in Arguments and Reply objects.
+void LEDControl1 (Arguments *in, Reply *out) {
+    bool success = true;
+
+    // In this scenario, when using RPC delimit the two arguments with a space.
+    x = in->getArg<double>();
+    y = in->getArg<double>();
+
+    // Have code here to call another RPC function to wake up specific led or close it.
+    char buffer[200], outbuf[256];
+    char strings[20];
+    int led1 = x;
+    int led2 = y;
+    while (1)
+    {
+        sprintf(strings, "/myled%d/write 1", led1);
+        strcpy(buffer, strings);
+        RPC::call(buffer, outbuf);
+        if (success) {
+            out->putData(buffer);
+        } else {
+            out->putData("Failed to execute LED control.");
+        }
+        ThisThread::sleep_for(500ms);
+        sprintf(strings, "/myled%d/write 0", led1);
+        strcpy(buffer, strings);
+        RPC::call(buffer, outbuf);
+        if (success) {
+            out->putData(buffer);
+        } else {
+            out->putData("Failed to execute LED control.");
+        }
+        sprintf(strings, "/myled%d/write 1", led2);
+        strcpy(buffer, strings);
+        RPC::call(buffer, outbuf);
+        if (success) {
+            out->putData(buffer);
+        } else {
+            out->putData("Failed to execute LED control.");
+        }
+        ThisThread::sleep_for(500ms);
+        sprintf(strings, "/myled%d/write 0", led2);
+        strcpy(buffer, strings);
+        RPC::call(buffer, outbuf);
+        if (success) {
+            out->putData(buffer);
+        } else {
+            out->putData("Failed to execute LED control.");
+        }
+    }
+}
 void LEDControl (Arguments *in, Reply *out)   {
     bool success = true;
 
